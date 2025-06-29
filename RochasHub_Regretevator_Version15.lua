@@ -1,5 +1,4 @@
--- Rochas Hub V4 - Regretevator (ESP NPC, TP Final aprimorado, Scroll nas abas, WalkSpeed/JumpPower ajustáveis com barra fixa)
-
+-- Rochas Hub V4 - Regretevator (Sliders e funções aparecendo, scroll, ESP NPC, TP Final)
 local plr = game.Players.LocalPlayer
 
 if plr.PlayerGui:FindFirstChild("RochasHub") then
@@ -14,7 +13,7 @@ local sliderColor = Color3.fromRGB(110, 140, 255)
 local gui = Instance.new("ScreenGui")
 gui.Name = "RochasHub"
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-gui.Parent = game.CoreGui or plr.PlayerGui -- Compatível com executor
+gui.Parent = game.CoreGui or plr.PlayerGui
 
 local defaultMainSize = UDim2.new(0, 470, 0, 320)
 local defaultMainPosition = UDim2.new(0.5, -235, 0.5, -160)
@@ -83,6 +82,142 @@ for i, v in ipairs(sections) do
     sideButtons[v] = btn
 end
 
+-- Slider fixo e funcional
+function createModernSlider(parent, y, labelText, default, setter, min, max, step)
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(1, -30, 0, 36)
+    frame.Position = UDim2.new(0, 10, 0, y)
+    frame.BackgroundTransparency = 1
+
+    local label = Instance.new("TextLabel", frame)
+    label.Text = labelText
+    label.Size = UDim2.new(1, 0, 0, 13)
+    label.Position = UDim2.new(0, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 12
+    label.TextColor3 = Color3.fromRGB(200,200,200)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+
+    local valLabel = Instance.new("TextLabel", frame)
+    valLabel.Text = tostring(default)
+    valLabel.Size = UDim2.new(0, 40, 0, 18)
+    valLabel.Position = UDim2.new(0, 0, 0, 15)
+    valLabel.BackgroundTransparency = 1
+    valLabel.Font = Enum.Font.GothamBold
+    valLabel.TextSize = 13
+    valLabel.TextColor3 = Color3.fromRGB(230,230,230)
+    valLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    local bar = Instance.new("TextButton", frame)
+    bar.BackgroundTransparency = 0
+    bar.AutoButtonColor = false
+    bar.Position = UDim2.new(0, 44, 0, 21)
+    bar.Size = UDim2.new(1, -54, 0, 8)
+    bar.BackgroundColor3 = Color3.fromRGB(34,34,38)
+    bar.BorderSizePixel = 0
+    Instance.new("UICorner", bar).CornerRadius = UDim.new(1, 0)
+
+    local fill = Instance.new("Frame", bar)
+    fill.BackgroundColor3 = sliderColor
+    fill.Size = UDim2.new((default-min)/(max-min), 0, 1, 0)
+    fill.Position = UDim2.new(0, 0, 0, 0)
+    fill.BorderSizePixel = 0
+    Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+
+    local knob = Instance.new("Frame", bar)
+    knob.Size = UDim2.new(0, 15, 0, 15)
+    knob.Position = UDim2.new((default-min)/(max-min), -7, 0.5, -7)
+    knob.BackgroundColor3 = Color3.fromRGB(240,240,240)
+    knob.BorderSizePixel = 0
+    knob.ZIndex = 2
+    Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 7)
+
+    local dragging = false
+
+    local function setSlider(val)
+        val = math.clamp(val, min, max)
+        if step then val = math.floor(val/step+0.5)*step end
+        local percent = (val-min)/(max-min)
+        fill.Size = UDim2.new(percent,0,1,0)
+        knob.Position = UDim2.new(percent, -7, 0.5, -7)
+        valLabel.Text = tostring(val)
+        setter(val)
+    end
+
+    bar.MouseButton1Down:Connect(function(x, y)
+        dragging = true
+        local input = game:GetService("UserInputService")
+        local abs, w = bar.AbsolutePosition.X, bar.AbsoluteSize.X
+        local function update()
+            local mouseX = input:GetMouseLocation().X
+            local percent = math.clamp((mouseX-abs)/w, 0, 1)
+            local val = min + (max-min)*percent
+            if step then val = math.floor(val/step+0.5)*step end
+            setSlider(val)
+        end
+        update()
+        local moveC, upC
+        moveC = input.InputChanged:Connect(function(inputObj)
+            if dragging and inputObj.UserInputType == Enum.UserInputType.MouseMovement then
+                update()
+            end
+        end)
+        upC = input.InputEnded:Connect(function(inputObj)
+            if inputObj.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+                moveC:Disconnect()
+                upC:Disconnect()
+            end
+        end)
+    end)
+    setSlider(default)
+    return setSlider
+end
+
+function createToggleSwitch(parent, y, labelText, state, callback)
+    local frame = Instance.new("Frame", parent)
+    frame.Size = UDim2.new(1, -30, 0, 32)
+    frame.Position = UDim2.new(0, 10, 0, y)
+    frame.BackgroundTransparency = 1
+    local label = Instance.new("TextLabel", frame)
+    label.Text = labelText
+    label.Size = UDim2.new(1, -54, 1, 0)
+    label.Position = UDim2.new(0, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamMedium
+    label.TextSize = 14
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextColor3 = Color3.fromRGB(230,230,230)
+    local btn = Instance.new("TextButton", frame)
+    btn.Size = UDim2.new(0, 44, 0, 22)
+    btn.Position = UDim2.new(1, -52, 0.5, -11)
+    btn.BackgroundColor3 = state and Color3.fromRGB(180, 220, 60) or Color3.fromRGB(60,60,60)
+    btn.BorderSizePixel = 0
+    btn.Text = ""
+    btn.AutoButtonColor = false
+    btn.ZIndex = 2
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 12)
+    local circle = Instance.new("Frame", btn)
+    circle.Size = UDim2.new(0, 18, 0, 18)
+    circle.Position = UDim2.new(state and 1 or 0, state and -20 or 2, 0.5, -9)
+    circle.BackgroundColor3 = Color3.fromRGB(240,240,240)
+    circle.BorderSizePixel = 0
+    Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 8)
+    circle.ZIndex = 3
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.BackgroundColor3 = state and Color3.fromRGB(180, 220, 60) or Color3.fromRGB(60,60,60)
+        circle:TweenPosition(UDim2.new(state and 1 or 0, state and -20 or 2, 0.5, -9), "Out", "Quad", 0.18, true)
+        callback(state)
+    end)
+    return function(newState)
+        state = newState
+        btn.BackgroundColor3 = state and Color3.fromRGB(180, 220, 60) or Color3.fromRGB(60,60,60)
+        circle.Position = UDim2.new(state and 1 or 0, state and -20 or 2, 0.5, -9)
+    end
+end
+
 -- Variáveis globais/configurações
 local fbActive, oldLighting = false, {}
 local regreteSpeed = 16
@@ -92,16 +227,6 @@ local espNPCEnabled = false
 local espGenEnabled = false
 local hubAberto = true
 
--- Funções para remover efeitos
-local function removeFullbright()
-    if fbActive then
-        local lighting = game:GetService("Lighting")
-        for k,v in pairs(oldLighting) do
-            lighting[k] = v
-        end
-        fbActive = false
-    end
-end
 local espBoxes = {}
 local function removeEsp() for _,v in pairs(espBoxes) do if v and v.Parent then v:Destroy() end end espBoxes = {} end
 local espGenBoxes = {}
@@ -304,101 +429,6 @@ local function createHome()
     pages["Home"] = page
 end
 
--- Modern Slider (corrigido: drag funcional e barra sempre ajusta valor)
-function createModernSlider(parent, y, labelText, default, setter, min, max, step)
-    local frame = Instance.new("Frame", parent)
-    frame.Size = UDim2.new(1, -30, 0, 36)
-    frame.Position = UDim2.new(0, 10, 0, y)
-    frame.BackgroundTransparency = 1
-
-    local label = Instance.new("TextLabel", frame)
-    label.Text = labelText
-    label.Size = UDim2.new(1, 0, 0, 13)
-    label.Position = UDim2.new(0, 0, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Font = Enum.Font.Gotham
-    label.TextSize = 12
-    label.TextColor3 = Color3.fromRGB(200,200,200)
-    label.TextXAlignment = Enum.TextXAlignment.Left
-
-    local valLabel = Instance.new("TextLabel", frame)
-    valLabel.Text = tostring(default)
-    valLabel.Size = UDim2.new(0, 40, 0, 18)
-    valLabel.Position = UDim2.new(0, 0, 0, 15)
-    valLabel.BackgroundTransparency = 1
-    valLabel.Font = Enum.Font.GothamBold
-    valLabel.TextSize = 13
-    valLabel.TextColor3 = Color3.fromRGB(230,230,230)
-    valLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-    local bar = Instance.new("Frame", frame)
-    bar.Position = UDim2.new(0, 44, 0, 21)
-    bar.Size = UDim2.new(1, -54, 0, 8)
-    bar.BackgroundColor3 = Color3.fromRGB(34,34,38)
-    bar.BorderSizePixel = 0
-    Instance.new("UICorner", bar).CornerRadius = UDim.new(1, 0)
-
-    local fill = Instance.new("Frame", bar)
-    fill.BackgroundColor3 = sliderColor
-    fill.Size = UDim2.new((default-min)/(max-min), 0, 1, 0)
-    fill.Position = UDim2.new(0, 0, 0, 0)
-    fill.BorderSizePixel = 0
-    Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
-
-    local knob = Instance.new("Frame", bar)
-    knob.Size = UDim2.new(0, 15, 0, 15)
-    knob.Position = UDim2.new((default-min)/(max-min), -7, 0.5, -7)
-    knob.BackgroundColor3 = Color3.fromRGB(240,240,240)
-    knob.BorderSizePixel = 0
-    knob.ZIndex = 2
-    Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 7)
-
-    local dragging = false
-    bar.InputBegan:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-        end
-    end)
-    bar.InputEnded:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-    bar.InputChanged:Connect(function(i)
-        if i.UserInputType == Enum.UserInputType.MouseMovement and dragging then
-            local abs, w = bar.AbsolutePosition.X, bar.AbsoluteSize.X
-            local mx = game:GetService("UserInputService"):GetMouseLocation().X
-            local percent = math.clamp((mx-abs)/w, 0, 1)
-            local val = min + (max-min)*percent
-            if step then
-                val = math.floor(val/step+0.5)*step
-            end
-            valLabel.Text = tostring(val)
-            fill.Size = UDim2.new(percent,0,1,0)
-            knob.Position = UDim2.new(percent, -7, 0.5, -7)
-            setter(val)
-        end
-    end)
-    bar.MouseLeave:Connect(function()
-        dragging = false
-    end)
-    -- Clique direto na barra
-    bar.MouseButton1Down:Connect(function()
-        local mx = game:GetService("UserInputService"):GetMouseLocation().X
-        local abs, w = bar.AbsolutePosition.X, bar.AbsoluteSize.X
-        local percent = math.clamp((mx-abs)/w, 0, 1)
-        local val = min + (max-min)*percent
-        if step then
-            val = math.floor(val/step+0.5)*step
-        end
-        valLabel.Text = tostring(val)
-        fill.Size = UDim2.new(percent,0,1,0)
-        knob.Position = UDim2.new(percent, -7, 0.5, -7)
-        setter(val)
-    end)
-end
-
--- Regretevator page
 local function createRegretevator()
     if pages["Regretevator"] then return end
     local page = Instance.new("ScrollingFrame", main)
@@ -439,30 +469,29 @@ local function createRegretevator()
             lighting.Ambient = Color3.new(1, 1, 1)
             fbActive = true
         else
-            removeFullbright()
+            if fbActive then
+                local lighting = game:GetService("Lighting")
+                for k,v in pairs(oldLighting) do lighting[k]=v end
+                fbActive = false
+            end
         end
     end)
 
-    -- Sliders com valores atualizáveis
+    -- Sliders
     createModernSlider(page, 70, "Walkspeed", regreteSpeed, function(v)
         regreteSpeed = v
         local char = plr.Character
         if char then
             local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum.WalkSpeed = regreteSpeed
-            end
+            if hum then hum.WalkSpeed = regreteSpeed end
         end
     end, 1, 200, 1)
-
     createModernSlider(page, 110, "JumpSize", regreteJump, function(v)
         regreteJump = v
         local char = plr.Character
         if char then
             local hum = char:FindFirstChildOfClass("Humanoid")
-            if hum then
-                hum.JumpPower = regreteJump
-            end
+            if hum then hum.JumpPower = regreteJump end
         end
     end, 1, 200, 1)
 
@@ -547,7 +576,6 @@ local function createRegretevator()
         end
     end)
 
-    -- ESP NPCs otimizado
     createToggleSwitch(page, 190, "ESP NPCs", espNPCEnabled, function(on)
         espNPCEnabled = on
         if espNPCEnabled then
@@ -557,7 +585,6 @@ local function createRegretevator()
         end
     end)
 
-    -- ESP Geradores
     local function isGenerator(obj)
         local lowerName = obj.Name:lower()
         return (
@@ -604,7 +631,6 @@ local function createRegretevator()
         end
     end)
 
-    -- Botão Teleportar para o Fim
     local tpBtn = Instance.new("TextButton", page)
     tpBtn.Size = UDim2.new(1, -30, 0, 36)
     tpBtn.Position = UDim2.new(0, 10, 0, 265)
@@ -621,7 +647,11 @@ local function createRegretevator()
 
     close.MouseButton1Click:Connect(function()
         hubAberto = false
-        removeFullbright()
+        if fbActive then
+            local lighting = game:GetService("Lighting")
+            for k,v in pairs(oldLighting) do lighting[k]=v end
+            fbActive = false
+        end
         removeEsp()
         disconnectNpcEsp()
         removeGenEsp()
