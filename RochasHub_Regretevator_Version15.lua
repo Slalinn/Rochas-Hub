@@ -1,4 +1,4 @@
--- Rochas Hub V4 - Regretevator (Sliders e funções aparecendo, scroll, ESP NPC, TP Final)
+-- Rochas Hub V4 - Regretevator (sem canal Home, TP BRADO, TP CONSTRUÇÃO, TP SORVETE)
 local plr = game.Players.LocalPlayer
 
 if plr.PlayerGui:FindFirstChild("RochasHub") then
@@ -62,10 +62,11 @@ sidebar.Position = UDim2.new(0, 0, 0, 32)
 sidebar.BorderSizePixel = 0
 Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0, 10)
 
-local sections = { "Home", "Regretevator" }
-local icons = { "🏠", "⭐" }
+-- Só uma aba: Regretevator
+local sections = { "Regretevator" }
+local icons = { "⭐" }
 local sideButtons, pages = {}, {}
-local selectedSection = "Home"
+local selectedSection = "Regretevator"
 
 for i, v in ipairs(sections) do
     local btn = Instance.new("TextButton", sidebar)
@@ -73,16 +74,15 @@ for i, v in ipairs(sections) do
     btn.Position = UDim2.new(0, 6, 0, 10 + (i-1)*44)
     btn.Text = icons[i].."  "..v
     btn.Font = Enum.Font.GothamBold
-    btn.TextColor3 = v==selectedSection and accentText or mainAccent
+    btn.TextColor3 = accentText
     btn.TextXAlignment = Enum.TextXAlignment.Left
-    btn.BackgroundTransparency = v==selectedSection and 0.08 or 0.7
-    btn.BackgroundColor3 = v==selectedSection and mainAccent or Color3.fromRGB(51,51,36)
+    btn.BackgroundTransparency = 0.08
+    btn.BackgroundColor3 = mainAccent
     btn.AutoButtonColor, btn.BorderSizePixel, btn.ZIndex = true, 0, 2
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
     sideButtons[v] = btn
 end
 
--- Slider fixo e funcional
 function createModernSlider(parent, y, labelText, default, setter, min, max, step)
     local frame = Instance.new("Frame", parent)
     frame.Size = UDim2.new(1, -30, 0, 36)
@@ -218,19 +218,15 @@ function createToggleSwitch(parent, y, labelText, state, callback)
     end
 end
 
--- Variáveis globais/configurações
 local fbActive, oldLighting = false, {}
 local regreteSpeed = 16
 local regreteJump = 50
 local espEnabled = false
 local espNPCEnabled = false
-local espGenEnabled = false
 local hubAberto = true
 
 local espBoxes = {}
 local function removeEsp() for _,v in pairs(espBoxes) do if v and v.Parent then v:Destroy() end end espBoxes = {} end
-local espGenBoxes = {}
-local function removeGenEsp() for _,v in pairs(espGenBoxes) do if v and v.Parent then v:Destroy() end end espGenBoxes = {} end
 
 -- ESP NPC otimizado
 local espNPCBoxes = {}
@@ -290,7 +286,6 @@ local function disconnectNpcEsp()
     espNPCBoxes = {}
 end
 
--- RESTAURA WalkSpeed/JumpPower ao fechar
 local function restoreWalkAndJump()
     local char = plr.Character
     if char then
@@ -312,121 +307,28 @@ charAddedConn = plr.CharacterAdded:Connect(function(char)
     end
 end)
 
--- Teleporte para o final da fase (evita elevador)
-local function tpToEnd()
-    local char = plr.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
+-- TP FINAL DA FAZE BRADO (coordenadas da imagem fornecida)
+local function tpBrado()
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 2)
     if not hrp then return end
-
-    local keywords = {"next", "finish", "saida", "exit", "final", "end", "goal"}
-    local blacklist = {"elevator", "elevador"}
-    local candidates = {}
-
-    for _,obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and obj.CanCollide and obj.Transparency < 0.95 then
-            local n = obj.Name:lower()
-            local isFinal = false
-            for _,k in ipairs(keywords) do
-                if n:find(k) then isFinal = true break end
-            end
-            for _,blk in ipairs(blacklist) do
-                if n:find(blk) then isFinal = false break end
-            end
-            if isFinal then
-                table.insert(candidates, obj)
-            end
-        end
-    end
-
-    local best, dist = nil, 0
-    for _,part in ipairs(candidates) do
-        local d = (part.Position - hrp.Position).Magnitude
-        if d > dist then dist = d; best = part end
-    end
-
-    if best then
-        hrp.CFrame = best.CFrame + Vector3.new(0, 3, 0)
-    else
-        local biggest, size = nil, 0
-        for _,obj in ipairs(workspace:GetDescendants()) do
-            local n = obj.Name:lower()
-            if obj:IsA("BasePart") and obj.Size.Magnitude > size and obj.CanCollide and obj.Transparency < 0.95 and not n:find("elevator") and not n:find("elevador") then
-                size = obj.Size.Magnitude
-                biggest = obj
-            end
-        end
-        if biggest then
-            hrp.CFrame = biggest.CFrame + Vector3.new(0, 3, 0)
-        end
-    end
+    hrp.CFrame = CFrame.new(-203.95, 102.24, 19.85)
 end
 
--- Home page
-local function createHome()
-    if pages["Home"] then return end
-    local page = Instance.new("ScrollingFrame", main)
-    page.Name = "Home"
-    page.Size = UDim2.new(1, -120, 1, -32)
-    page.Position = UDim2.new(0, 120, 0, 32)
-    page.BackgroundTransparency = 1
-    page.Visible = false
-    page.ZIndex = 3
-    page.ScrollBarThickness = 7
-    page.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    page.VerticalScrollBarInset = Enum.ScrollBarInset.Always
+-- TP FINAL DA FASE DE CONSTRUÇÃO (coordenadas da segunda imagem)
+local function tpConstrucao()
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 2)
+    if not hrp then return end
+    hrp.CFrame = CFrame.new(-103.20, 525.27, 22.60)
+end
 
-    local logo = Instance.new("TextLabel", page)
-    logo.Text = "ROCHAS HUB"
-    logo.Font = Enum.Font.GothamBlack
-    logo.TextColor3 = mainAccent
-    logo.TextSize = 38
-    logo.Position = UDim2.new(0, 30, 0, 14)
-    logo.Size = UDim2.new(1, -60, 0, 42)
-    logo.BackgroundTransparency = 1
-    logo.TextXAlignment = Enum.TextXAlignment.Left
-
-    local vers = Instance.new("TextLabel", page)
-    vers.Text = "2025 PREMIUM"
-    vers.Font = Enum.Font.GothamBlack
-    vers.TextColor3 = mainAccentDark
-    vers.TextSize = 15
-    vers.Position = UDim2.new(0, 34, 0, 50)
-    vers.Size = UDim2.new(0, 120, 0, 18)
-    vers.BackgroundTransparency = 1
-    vers.TextXAlignment = Enum.TextXAlignment.Left
-
-    local welcome = Instance.new("TextLabel", page)
-    welcome.Text = "Obrigado por usar o Rochas Hub!\nVersão Regretevator"
-    welcome.Font = Enum.Font.GothamBold
-    welcome.TextColor3 = Color3.fromRGB(255,255,255)
-    welcome.TextSize = 16
-    welcome.Position = UDim2.new(0, 30, 0, 75)
-    welcome.Size = UDim2.new(1, -40, 0, 40)
-    welcome.BackgroundTransparency = 1
-    welcome.TextXAlignment = Enum.TextXAlignment.Left
-    welcome.TextYAlignment = Enum.TextYAlignment.Top
-
-    local img = Instance.new("ImageLabel", page)
-    img.Image = "rbxassetid://16007954275"
-    img.Size = UDim2.new(0, 74, 0, 74)
-    img.Position = UDim2.new(1, -110, 0, 25)
-    img.BackgroundTransparency = 1
-
-    local copyBtn = Instance.new("TextButton", page)
-    copyBtn.Size = UDim2.new(0, 150, 0, 32)
-    copyBtn.Position = UDim2.new(0, 30, 0, 125)
-    copyBtn.Text = "📋 Copy Discord"
-    copyBtn.Font = Enum.Font.GothamBold
-    copyBtn.TextColor3 = Color3.fromRGB(38,38,38)
-    copyBtn.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-    copyBtn.BackgroundTransparency = 0
-    copyBtn.AutoButtonColor = true
-    copyBtn.BorderSizePixel = 0
-    Instance.new("UICorner", copyBtn).CornerRadius = UDim.new(1, 12)
-    copyBtn.MouseButton1Click:Connect(function() end)
-
-    pages["Home"] = page
+-- TP FINAL DA FASE DO SORVETE (coordenadas da terceira imagem)
+local function tpSorvete()
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 2)
+    if not hrp then return end
+    hrp.CFrame = CFrame.new(-186.47, 12.49, 18.31)
 end
 
 local function createRegretevator()
@@ -477,7 +379,6 @@ local function createRegretevator()
         end
     end)
 
-    -- Sliders
     createModernSlider(page, 70, "Walkspeed", regreteSpeed, function(v)
         regreteSpeed = v
         local char = plr.Character
@@ -585,65 +486,50 @@ local function createRegretevator()
         end
     end)
 
-    local function isGenerator(obj)
-        local lowerName = obj.Name:lower()
-        return (
-            lowerName:find("generator") or
-            lowerName:find("gerador") or
-            lowerName:find("gen")
-        ) and (obj:IsA("Model") or obj:IsA("BasePart"))
-    end
-    local function createEspForGen(gen)
-        if espGenBoxes[gen] then return end
-        local adornee = gen:IsA("BasePart") and gen or gen:FindFirstChildWhichIsA("BasePart")
-        if not adornee then return end
-        local box = Instance.new("BoxHandleAdornment")
-        box.Adornee = adornee
-        box.AlwaysOnTop = true
-        box.ZIndex = 10
-        box.Size = Vector3.new(4,6,2)
-        box.Color3 = mainAccentDark
-        box.Transparency = 0.13
-        box.Parent = workspace
-        box.Name = "[ESP-Generator]"
-        espGenBoxes[gen] = box
-    end
+    -- Botão TP BRADO
+    local tpBradoBtn = Instance.new("TextButton", page)
+    tpBradoBtn.Size = UDim2.new(1, -30, 0, 36)
+    tpBradoBtn.Position = UDim2.new(0, 10, 0, 225)
+    tpBradoBtn.Text = "🇧🇷 TP pro final da faze BRADO"
+    tpBradoBtn.Font = Enum.Font.GothamBold
+    tpBradoBtn.TextColor3 = Color3.fromRGB(38,38,38)
+    tpBradoBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 127)
+    tpBradoBtn.BackgroundTransparency = 0.05
+    tpBradoBtn.AutoButtonColor = true
+    tpBradoBtn.BorderSizePixel = 0
+    tpBradoBtn.TextSize = 16
+    Instance.new("UICorner", tpBradoBtn).CornerRadius = UDim.new(1, 12)
+    tpBradoBtn.MouseButton1Click:Connect(tpBrado)
 
-    createToggleSwitch(page, 225, "ESP Geradores", espGenEnabled, function(on)
-        espGenEnabled = on
-        if not espGenEnabled then
-            removeGenEsp()
-        end
-    end)
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if not espGenEnabled then return end
-        for gen,box in pairs(espGenBoxes) do if not gen.Parent then box:Destroy() espGenBoxes[gen] = nil end end
-        for _,obj in ipairs(workspace:GetDescendants()) do
-            if isGenerator(obj) then
-                if not espGenBoxes[obj] then
-                    createEspForGen(obj)
-                else
-                    local box = espGenBoxes[obj]
-                    local adornee = obj:IsA("BasePart") and obj or obj:FindFirstChildWhichIsA("BasePart")
-                    box.Adornee = adornee
-                end
-            end
-        end
-    end)
+    -- Botão TP Construção
+    local tpConstrucaoBtn = Instance.new("TextButton", page)
+    tpConstrucaoBtn.Size = UDim2.new(1, -30, 0, 36)
+    tpConstrucaoBtn.Position = UDim2.new(0, 10, 0, 265)
+    tpConstrucaoBtn.Text = "🚧 TP pro final da fase de construção"
+    tpConstrucaoBtn.Font = Enum.Font.GothamBold
+    tpConstrucaoBtn.TextColor3 = Color3.fromRGB(38,38,38)
+    tpConstrucaoBtn.BackgroundColor3 = Color3.fromRGB(255, 220, 0)
+    tpConstrucaoBtn.BackgroundTransparency = 0.05
+    tpConstrucaoBtn.AutoButtonColor = true
+    tpConstrucaoBtn.BorderSizePixel = 0
+    tpConstrucaoBtn.TextSize = 16
+    Instance.new("UICorner", tpConstrucaoBtn).CornerRadius = UDim.new(1, 12)
+    tpConstrucaoBtn.MouseButton1Click:Connect(tpConstrucao)
 
-    local tpBtn = Instance.new("TextButton", page)
-    tpBtn.Size = UDim2.new(1, -30, 0, 36)
-    tpBtn.Position = UDim2.new(0, 10, 0, 265)
-    tpBtn.Text = "⏩ TP para o Final"
-    tpBtn.Font = Enum.Font.GothamBold
-    tpBtn.TextColor3 = Color3.fromRGB(38,38,38)
-    tpBtn.BackgroundColor3 = Color3.fromRGB(220, 220, 80)
-    tpBtn.BackgroundTransparency = 0.05
-    tpBtn.AutoButtonColor = true
-    tpBtn.BorderSizePixel = 0
-    tpBtn.TextSize = 16
-    Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(1, 12)
-    tpBtn.MouseButton1Click:Connect(tpToEnd)
+    -- Botão TP Sorvete
+    local tpSorveteBtn = Instance.new("TextButton", page)
+    tpSorveteBtn.Size = UDim2.new(1, -30, 0, 36)
+    tpSorveteBtn.Position = UDim2.new(0, 10, 0, 305)
+    tpSorveteBtn.Text = "🍦 TP pro final da fase do sorvete"
+    tpSorveteBtn.Font = Enum.Font.GothamBold
+    tpSorveteBtn.TextColor3 = Color3.fromRGB(38,38,38)
+    tpSorveteBtn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+    tpSorveteBtn.BackgroundTransparency = 0.05
+    tpSorveteBtn.AutoButtonColor = true
+    tpSorveteBtn.BorderSizePixel = 0
+    tpSorveteBtn.TextSize = 16
+    Instance.new("UICorner", tpSorveteBtn).CornerRadius = UDim.new(1, 12)
+    tpSorveteBtn.MouseButton1Click:Connect(tpSorvete)
 
     close.MouseButton1Click:Connect(function()
         hubAberto = false
@@ -654,7 +540,6 @@ local function createRegretevator()
         end
         removeEsp()
         disconnectNpcEsp()
-        removeGenEsp()
         restoreWalkAndJump()
         if loopConn then loopConn:Disconnect() end
         if charConn then charConn:Disconnect() end
@@ -664,7 +549,6 @@ local function createRegretevator()
     pages["Regretevator"] = page
 end
 
-createHome()
 createRegretevator()
 
 local TweenService = game:GetService("TweenService")
@@ -689,9 +573,9 @@ for k,v in pairs(sideButtons) do
     v.MouseButton1Click:Connect(function()
         selectedSection = k
         for n,btn in pairs(sideButtons) do
-            btn.TextColor3 = n==selectedSection and accentText or mainAccent
-            btn.BackgroundTransparency = n==selectedSection and 0.08 or 0.7
-            btn.BackgroundColor3 = n==selectedSection and mainAccent or Color3.fromRGB(51,51,36)
+            btn.TextColor3 = accentText
+            btn.BackgroundTransparency = 0.08
+            btn.BackgroundColor3 = mainAccent
         end
         showTab(k)
     end)
@@ -701,7 +585,7 @@ for _,page in pairs(pages) do
     page.Visible = false 
     page.Position = pageYEnd
 end
-pages["Home"].Visible = true
+pages["Regretevator"].Visible = true
 
 local mini = Instance.new("ImageButton", gui)
 mini.Size = minimizedSize
