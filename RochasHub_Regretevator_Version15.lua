@@ -1,4 +1,4 @@
--- Rochas Hub V4 - Regretevator (sem canal Home, TP BRADO, TP CONSTRUÇÃO, TP SORVETE)
+-- Rochas Hub V4 - Regretevator (todos os TPs custom, TP Chicara, sem deslizar, sem Noclip)
 local plr = game.Players.LocalPlayer
 
 if plr.PlayerGui:FindFirstChild("RochasHub") then
@@ -62,7 +62,6 @@ sidebar.Position = UDim2.new(0, 0, 0, 32)
 sidebar.BorderSizePixel = 0
 Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0, 10)
 
--- Só uma aba: Regretevator
 local sections = { "Regretevator" }
 local icons = { "⭐" }
 local sideButtons, pages = {}, {}
@@ -307,28 +306,48 @@ charAddedConn = plr.CharacterAdded:Connect(function(char)
     end
 end)
 
--- TP FINAL DA FAZE BRADO (coordenadas da imagem fornecida)
+-- TPs personalizados:
 local function tpBrado()
     local char = plr.Character or plr.CharacterAdded:Wait()
     local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 2)
     if not hrp then return end
     hrp.CFrame = CFrame.new(-203.95, 102.24, 19.85)
 end
-
--- TP FINAL DA FASE DE CONSTRUÇÃO (coordenadas da segunda imagem)
 local function tpConstrucao()
     local char = plr.Character or plr.CharacterAdded:Wait()
     local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 2)
     if not hrp then return end
     hrp.CFrame = CFrame.new(-103.20, 525.27, 22.60)
 end
-
--- TP FINAL DA FASE DO SORVETE (coordenadas da terceira imagem)
 local function tpSorvete()
     local char = plr.Character or plr.CharacterAdded:Wait()
     local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 2)
     if not hrp then return end
     hrp.CFrame = CFrame.new(-186.47, 12.49, 18.31)
+end
+local function tpPrincesa()
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 2)
+    if not hrp then return end
+    hrp.CFrame = CFrame.new(-416.19, 13.30, 59.18)
+end
+local function tpGregoriah()
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 2)
+    if not hrp then return end
+    hrp.CFrame = CFrame.new(-58.62, 50.95, 9.22)
+end
+local function tpMarioKart()
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 2)
+    if not hrp then return end
+    hrp.CFrame = CFrame.new(-764.50, 93.53, 563.38)
+end
+local function tpChicara()
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart", 2)
+    if not hrp then return end
+    hrp.CFrame = CFrame.new(-302.25, 27.86, 24.81)
 end
 
 local function createRegretevator()
@@ -486,50 +505,33 @@ local function createRegretevator()
         end
     end)
 
-    -- Botão TP BRADO
-    local tpBradoBtn = Instance.new("TextButton", page)
-    tpBradoBtn.Size = UDim2.new(1, -30, 0, 36)
-    tpBradoBtn.Position = UDim2.new(0, 10, 0, 225)
-    tpBradoBtn.Text = "🇧🇷 TP pro final da faze BRADO"
-    tpBradoBtn.Font = Enum.Font.GothamBold
-    tpBradoBtn.TextColor3 = Color3.fromRGB(38,38,38)
-    tpBradoBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 127)
-    tpBradoBtn.BackgroundTransparency = 0.05
-    tpBradoBtn.AutoButtonColor = true
-    tpBradoBtn.BorderSizePixel = 0
-    tpBradoBtn.TextSize = 16
-    Instance.new("UICorner", tpBradoBtn).CornerRadius = UDim.new(1, 12)
-    tpBradoBtn.MouseButton1Click:Connect(tpBrado)
-
-    -- Botão TP Construção
-    local tpConstrucaoBtn = Instance.new("TextButton", page)
-    tpConstrucaoBtn.Size = UDim2.new(1, -30, 0, 36)
-    tpConstrucaoBtn.Position = UDim2.new(0, 10, 0, 265)
-    tpConstrucaoBtn.Text = "🚧 TP pro final da fase de construção"
-    tpConstrucaoBtn.Font = Enum.Font.GothamBold
-    tpConstrucaoBtn.TextColor3 = Color3.fromRGB(38,38,38)
-    tpConstrucaoBtn.BackgroundColor3 = Color3.fromRGB(255, 220, 0)
-    tpConstrucaoBtn.BackgroundTransparency = 0.05
-    tpConstrucaoBtn.AutoButtonColor = true
-    tpConstrucaoBtn.BorderSizePixel = 0
-    tpConstrucaoBtn.TextSize = 16
-    Instance.new("UICorner", tpConstrucaoBtn).CornerRadius = UDim.new(1, 12)
-    tpConstrucaoBtn.MouseButton1Click:Connect(tpConstrucao)
-
-    -- Botão TP Sorvete
-    local tpSorveteBtn = Instance.new("TextButton", page)
-    tpSorveteBtn.Size = UDim2.new(1, -30, 0, 36)
-    tpSorveteBtn.Position = UDim2.new(0, 10, 0, 305)
-    tpSorveteBtn.Text = "🍦 TP pro final da fase do sorvete"
-    tpSorveteBtn.Font = Enum.Font.GothamBold
-    tpSorveteBtn.TextColor3 = Color3.fromRGB(38,38,38)
-    tpSorveteBtn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-    tpSorveteBtn.BackgroundTransparency = 0.05
-    tpSorveteBtn.AutoButtonColor = true
-    tpSorveteBtn.BorderSizePixel = 0
-    tpSorveteBtn.TextSize = 16
-    Instance.new("UICorner", tpSorveteBtn).CornerRadius = UDim.new(1, 12)
-    tpSorveteBtn.MouseButton1Click:Connect(tpSorvete)
+    -- Botões de TP personalizados
+    local y = 225
+    local tps = {
+        {txt="🇧🇷 TP pro final da faze BRADO", color=Color3.fromRGB(0,255,127), fn=tpBrado},
+        {txt="🚧 TP pro final da fase de construção", color=Color3.fromRGB(255,220,0), fn=tpConstrucao},
+        {txt="🍦 TP pro final da fase do sorvete", color=Color3.fromRGB(255,170,0), fn=tpSorvete},
+        {txt="👑 TP pra salvar a princesa", color=Color3.fromRGB(255,110,180), fn=tpPrincesa},
+        {txt="🎈 TP Gregoriah", color=Color3.fromRGB(170,255,0), fn=tpGregoriah},
+        {txt="🏎️ TP Mario Kart (Use in kart)", color=Color3.fromRGB(0,200,255), fn=tpMarioKart},
+        {txt="☕ TP Chicara", color=Color3.fromRGB(200, 180, 255), fn=tpChicara},
+    }
+    for _,tp in ipairs(tps) do
+        local btn = Instance.new("TextButton", page)
+        btn.Size = UDim2.new(1, -30, 0, 36)
+        btn.Position = UDim2.new(0, 10, 0, y)
+        btn.Text = tp.txt
+        btn.Font = Enum.Font.GothamBold
+        btn.TextColor3 = Color3.fromRGB(38,38,38)
+        btn.BackgroundColor3 = tp.color
+        btn.BackgroundTransparency = 0.05
+        btn.AutoButtonColor = true
+        btn.BorderSizePixel = 0
+        btn.TextSize = 16
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 12)
+        btn.MouseButton1Click:Connect(tp.fn)
+        y = y + 40
+    end
 
     close.MouseButton1Click:Connect(function()
         hubAberto = false
@@ -541,8 +543,6 @@ local function createRegretevator()
         removeEsp()
         disconnectNpcEsp()
         restoreWalkAndJump()
-        if loopConn then loopConn:Disconnect() end
-        if charConn then charConn:Disconnect() end
         gui:Destroy()
     end)
 
