@@ -1,4 +1,4 @@
--- Rochas Hub V4 - Regretevator (todos os TPs custom, TP Chicara, sem deslizar, sem Noclip)
+-- Rochas Hub V4 - Regretevator (Aba "TP's" exclusiva para todos os TPs custom)
 local plr = game.Players.LocalPlayer
 
 if plr.PlayerGui:FindFirstChild("RochasHub") then
@@ -62,8 +62,8 @@ sidebar.Position = UDim2.new(0, 0, 0, 32)
 sidebar.BorderSizePixel = 0
 Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0, 10)
 
-local sections = { "Regretevator" }
-local icons = { "⭐" }
+local sections = { "Regretevator", "TP's" }
+local icons = { "⭐", "🗺️" }
 local sideButtons, pages = {}, {}
 local selectedSection = "Regretevator"
 
@@ -505,8 +505,35 @@ local function createRegretevator()
         end
     end)
 
-    -- Botões de TP personalizados
-    local y = 225
+    pages["Regretevator"] = page
+end
+
+-- ABA DE TPs
+local function createTPs()
+    if pages["TP's"] then return end
+    local page = Instance.new("ScrollingFrame", main)
+    page.Name = "TP's"
+    page.Size = UDim2.new(1, -120, 1, -32)
+    page.Position = UDim2.new(0, 120, 0, 32)
+    page.BackgroundTransparency = 1
+    page.Visible = false
+    page.ZIndex = 3
+    page.ScrollBarThickness = 7
+    page.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    page.VerticalScrollBarInset = Enum.ScrollBarInset.Always
+
+    local sectionTitle = Instance.new("TextLabel", page)
+    sectionTitle.Text = "| TP's"
+    sectionTitle.Size = UDim2.new(1, 0, 0, 20)
+    sectionTitle.Position = UDim2.new(0, 10, 0, 7)
+    sectionTitle.Font = Enum.Font.GothamSemibold
+    sectionTitle.TextColor3 = mainAccent
+    sectionTitle.TextSize = 17
+    sectionTitle.BackgroundTransparency = 1
+    sectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+    -- Todos os TPs, cada um num botão
+    local y = 38
     local tps = {
         {txt="🇧🇷 TP pro final da faze BRADO", color=Color3.fromRGB(0,255,127), fn=tpBrado},
         {txt="🚧 TP pro final da fase de construção", color=Color3.fromRGB(255,220,0), fn=tpConstrucao},
@@ -533,23 +560,11 @@ local function createRegretevator()
         y = y + 40
     end
 
-    close.MouseButton1Click:Connect(function()
-        hubAberto = false
-        if fbActive then
-            local lighting = game:GetService("Lighting")
-            for k,v in pairs(oldLighting) do lighting[k]=v end
-            fbActive = false
-        end
-        removeEsp()
-        disconnectNpcEsp()
-        restoreWalkAndJump()
-        gui:Destroy()
-    end)
-
-    pages["Regretevator"] = page
+    pages["TP's"] = page
 end
 
 createRegretevator()
+createTPs()
 
 local TweenService = game:GetService("TweenService")
 local transitionTime = 0.22
